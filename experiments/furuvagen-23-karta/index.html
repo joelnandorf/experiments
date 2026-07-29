@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Furuvägen 23 – husets karta</title>
+<meta name="description" content="Interaktiv karta över vårt hus på Furuvägen 23 i Holmsund, med satellitvy och en flyttbar nål.">
+<meta name="experiment:tags" content="karta, holmsund, hus">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<style>
+  :root {
+    color-scheme: light dark;
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --card-fg: #1c1c1c;
+    --accent: #2f6b3f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --card-bg: rgba(28, 28, 30, 0.9);
+      --card-fg: #f2f2f2;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  #map {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: #ddd;
+  }
+
+  .info-card {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1000;
+    background: var(--card-bg);
+    color: var(--card-fg);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 14px 18px;
+    max-width: min(320px, calc(100vw - 24px));
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  .info-card h1 {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    line-height: 1.3;
+  }
+
+  .info-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    line-height: 1.4;
+  }
+
+  .info-card .status {
+    margin-top: 8px;
+    font-size: 0.78rem;
+  }
+
+  .info-card button {
+    margin-top: 10px;
+    font: inherit;
+    font-size: 0.8rem;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+
+  .info-card button:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .house-pin {
+    font-size: 28px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+    transform: translateY(-4px);
+  }
+
+  .leaflet-popup-content {
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="info-card">
+  <h1>🏡 Furuvägen 23</h1>
+  <p>Holmsund, Sverige — vårt hus.</p>
+  <p class="status" id="status">Söker adressen …</p>
+  <button id="reset-btn" type="button" hidden>Återställ nålen</button>
+</div>
+
+<script>
+  // Ungefärlig position för Holmsund centrum, används tills adressen
+  // hittats (eller om sökningen misslyckas / du saknar internetuppkoppling).
+  const FALLBACK_POSITION = [63.7186, 20.3805];
+  const STORAGE_KEY = "furuvagen23-hus-position";
+  const ADDRESS_QUERY = "Furuvägen 23, Holmsund, Sverige";
+
+  const statusEl = document.getElementById("status");
+  const resetBtn = document.getElementById("reset-btn");
+
+  const houseIcon = L.divIcon({
+    html: '<div class="house-pin">🏡</div>',
+    className: "",
+    iconSize: [28, 28],
+    iconAnchor: [14, 24],
+    popupAnchor: [0, -24],
+  });
+
+  const map = L.map("map", { zoomControl: true });
+
+  const streets = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap-bidragsgivare",
+  });
+
+  const satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Flygfoto: Esri, Maxar, Earthstar Geographics",
+    }
+  );
+
+  streets.addTo(map);
+  L.control.layers({ "Karta": streets, "Satellit": satellite }).addTo(map);
+
+  let marker = L.marker(FALLBACK_POSITION, { icon: houseIcon, draggable: true })
+    .addTo(map)
+    .bindPopup("Furuvägen 23 – vårt hus<br>Dra nålen om den inte sitter rätt.");
+
+  function savePosition(latlng) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([latlng.lat, latlng.lng]));
+    resetBtn.hidden = false;
+  }
+
+  marker.on("dragend", () => {
+    savePosition(marker.getLatLng());
+    statusEl.textContent = "Nålens position sparad i den här webbläsaren.";
+  });
+
+  function placeAt(position, zoom, message) {
+    marker.setLatLng(position);
+    map.setView(position, zoom);
+    statusEl.textContent = message;
+  }
+
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (saved) {
+    const pos = JSON.parse(saved);
+    placeAt(pos, 18, "Visar din sparade nålposition.");
+    resetBtn.hidden = false;
+  } else {
+    map.setView(FALLBACK_POSITION, 14);
+    fetch(
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
+        encodeURIComponent(ADDRESS_QUERY)
+    )
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((results) => {
+        if (results && results.length > 0) {
+          const pos = [parseFloat(results[0].lat), parseFloat(results[0].lon)];
+          placeAt(pos, 18, "Adressen hittad. Dra nålen om den behöver justeras.");
+        } else {
+          throw new Error("no-results");
+        }
+      })
+      .catch(() => {
+        placeAt(
+          FALLBACK_POSITION,
+          14,
+          "Kunde inte slå upp adressen automatiskt — dra nålen till rätt plats."
+        );
+      });
+  }
+
+  resetBtn.addEventListener("click", () => {
+    localStorage.removeItem(STORAGE_KEY);
+    resetBtn.hidden = true;
+    location.reload();
+  });
+</script>
+
+</body>
+</html>
