@@ -17,14 +17,14 @@ Publika HTML-prototyper — en mapp per experiment, publicerat automatiskt via G
    mappen, och pushar till `origin/main` — oavsett vilken lokal branch du står på.
 
 GitHub Actions bygger och publicerar automatiskt inom en minut eller två. Experimentet blir
-live på `https://experiments.nandorf.dev/experiments/<mitt-experiment>/` och
+live på `https://experiments.nandorf.dev/<mitt-experiment>/` och
 dyker upp som ett kort på startsidan.
 
 ## Hur det fungerar
 
 - `scripts/build-site.mjs` skannar `experiments/*/index.html`, läser titel/beskrivning/taggar
-  och genererar `dist/index.html` + kopierar varje experimentmapp till `dist/experiments/...`.
-  Ingen extern dependency krävs — ren Node.js.
+  och genererar `dist/index.html` + kopierar varje experimentmapp till `dist/<slug>/` (dvs.
+  direkt på sajtens rot, utan `/experiments/`-prefix). Ingen extern dependency krävs — ren Node.js.
 - `.github/workflows/deploy.yml` körs vid varje push till `main`, kör byggskriptet och
   publicerar `dist/` till GitHub Pages.
 - `scripts/publish-experiment.mjs` (kört via `npm run ship -- <slug>`) paketerar build +

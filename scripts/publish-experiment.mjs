@@ -57,6 +57,6 @@ try {
 
 console.log(
   `\n✅ Publicerat! Live inom en minut eller två på:\n` +
-    `   https://experiments.nandorf.dev/experiments/${slug}/\n` +
+    `   https://experiments.nandorf.dev/${slug}/\n` +
     `   (översikt: https://experiments.nandorf.dev/)`,
 );

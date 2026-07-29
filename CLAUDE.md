@@ -26,7 +26,7 @@ klistrad direkt i chatten). I korthet:
    Skriptet pushar alltid till `origin/main` (oavsett vilken lokal branch som är utcheckad),
    eftersom det är push till `main` som triggar publiceringen.
 4. Rapportera till användaren:
-   - Den publika URL:en: `https://experiments.nandorf.dev/experiments/<slug>/`
+   - Den publika URL:en: `https://experiments.nandorf.dev/<slug>/`
    - Att översiktssidan uppdateras på `https://experiments.nandorf.dev/` inom
      en minut eller två (GitHub Actions-byggtid).
 
