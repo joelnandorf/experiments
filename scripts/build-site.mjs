@@ -7,6 +7,7 @@ import { join } from "node:path";
 const ROOT = new URL("..", import.meta.url).pathname;
 const EXPERIMENTS_DIR = join(ROOT, "experiments");
 const DIST_DIR = join(ROOT, "dist");
+const RESERVED_SLUGS = new Set(["index.html", ".nojekyll", "CNAME"]);
 
 function extractTag(html, regex, fallback = "") {
   const match = html.match(regex);
@@ -82,7 +83,7 @@ function renderCard(exp) {
     .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
     .join("");
   return `
-    <a class="card" href="experiments/${encodeURIComponent(exp.slug)}/index.html">
+    <a class="card" href="${encodeURIComponent(exp.slug)}/index.html">
       <h2>${escapeHtml(exp.title)}</h2>
       ${exp.description ? `<p>${escapeHtml(exp.description)}</p>` : ""}
       <div class="meta">
@@ -158,8 +159,13 @@ function build() {
   const experiments = discoverExperiments();
 
   for (const exp of experiments) {
+    if (RESERVED_SLUGS.has(exp.slug)) {
+      throw new Error(
+        `Experimentet "${exp.slug}" krockar med ett reserverat namn på sajtens rot (${[...RESERVED_SLUGS].join(", ")}). Byt slug.`,
+      );
+    }
     const src = join(EXPERIMENTS_DIR, exp.slug);
-    const dest = join(DIST_DIR, "experiments", exp.slug);
+    const dest = join(DIST_DIR, exp.slug);
     mkdirSync(dest, { recursive: true });
     cpSync(src, dest, { recursive: true });
   }
