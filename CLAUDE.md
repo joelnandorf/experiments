@@ -7,6 +7,10 @@ devops-steg krävs.
 
 ## Att skapa och publicera ett nytt experiment ("skapa ett experiment som gör X")
 
+Detta flöde finns paketerat som skillen [`publish-prototype`](./.claude/skills/publish-prototype/SKILL.md)
+— läs den för fullständiga instruktioner (bl.a. hur man hanterar slug-kollisioner och HTML
+klistrad direkt i chatten). I korthet:
+
 1. Välj ett kebab-case-slug som beskriver experimentet, t.ex. `experiments/farg-slumpare/`.
    Utgå gärna från `templates/basic/index.html` som startpunkt.
 2. Bygg experimentet i `experiments/<slug>/index.html` (+ ev. fler filer i samma mapp).
@@ -14,19 +18,22 @@ devops-steg krävs.
    - `<title>` — visas som experimentets namn på översiktssidan.
    - `<meta name="description" content="...">` — kort beskrivning på kortet.
    - Valfritt: `<meta name="experiment:tags" content="tag1, tag2">` för chips på kortet.
-3. Verifiera lokalt innan push: `npm run build` — kontrollera att skriptet listar det nya
-   experimentet utan fel och att `dist/experiments/<slug>/index.html` ser rimlig ut.
-4. Committa och pusha **direkt till `main`** (detta är ett lågriskigt sandbox-repo för
-   experiment — ingen PR-process behövs för vanliga tillägg av nya experiment).
-5. Rapportera till användaren:
+3. Bygg, committa och pusha i ett steg med hjälpskriptet — kör inte build/git manuellt, det
+   är lätt att glömma valideringssteget eller pusha till fel branch:
+   ```
+   node scripts/publish-experiment.mjs <slug> ["valfritt commit-meddelande"]
+   ```
+   Skriptet pushar alltid till `origin/main` (oavsett vilken lokal branch som är utcheckad),
+   eftersom det är push till `main` som triggar publiceringen.
+4. Rapportera till användaren:
    - Den publika URL:en: `https://joelnandorf.github.io/web-experiments/experiments/<slug>/`
    - Att översiktssidan uppdateras på `https://joelnandorf.github.io/web-experiments/` inom
      en minut eller två (GitHub Actions-byggtid).
 
 ## Att ändra ett befintligt experiment
 
-Redigera filerna i `experiments/<slug>/`, kör `npm run build` för att verifiera, committa och
-pusha till `main` på samma sätt.
+Redigera filerna i `experiments/<slug>/`, kör därefter samma
+`node scripts/publish-experiment.mjs <slug>` för att validera, committa och publicera.
 
 ## Att inte göra
 

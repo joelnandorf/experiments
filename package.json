@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-site.mjs"
+    "build": "node scripts/build-site.mjs",
+    "ship": "node scripts/publish-experiment.mjs"
   }
 }

@@ -9,17 +9,12 @@ Publika HTML-prototyper — en mapp per experiment, publicerat automatiskt via G
 1. Kopiera `templates/basic/index.html` till en ny mapp: `experiments/<mitt-experiment>/index.html`
    (använd kebab-case, t.ex. `experiments/farg-slumpare/index.html`). Lägg ev. CSS/JS/bilder i samma mapp.
 2. Sätt `<title>` och `<meta name="description">` i filen — de används för kortet på översiktssidan.
-3. Förhandsgranska lokalt:
+3. Bygg, committa och pusha i ett steg:
    ```
-   npm run build
+   npm run ship -- mitt-experiment ["valfritt commit-meddelande"]
    ```
-   Öppna `dist/index.html` i en webbläsare för att se resultatet.
-4. Committa och pusha till `main`:
-   ```
-   git add experiments/mitt-experiment
-   git commit -m "Lägg till experiment: mitt-experiment"
-   git push origin main
-   ```
+   Detta bygger om sajten och verifierar att experimentet plockas upp utan fel, committar
+   mappen, och pushar till `origin/main` — oavsett vilken lokal branch du står på.
 
 GitHub Actions bygger och publicerar automatiskt inom en minut eller två. Experimentet blir
 live på `https://joelnandorf.github.io/web-experiments/experiments/<mitt-experiment>/` och
@@ -32,6 +27,8 @@ dyker upp som ett kort på startsidan.
   Ingen extern dependency krävs — ren Node.js.
 - `.github/workflows/deploy.yml` körs vid varje push till `main`, kör byggskriptet och
   publicerar `dist/` till GitHub Pages.
+- `scripts/publish-experiment.mjs` (kört via `npm run ship -- <slug>`) paketerar build +
+  commit + push i ett steg, så att inget av dessa moment glöms bort eller görs i fel ordning.
 
 ## Engångssetup (redan gjort om sajten är live)
 
@@ -39,5 +36,7 @@ I repots inställningar: **Settings → Pages → Build and deployment → Sourc
 
 ## Använda Claude Code för att skapa & publicera experiment
 
-Se [`CLAUDE.md`](./CLAUDE.md) — be Claude Code "skapa ett experiment som gör X" och det
-sköter mapp, filer, build-verifiering, commit och push.
+Repot har en paketerad skill, [`publish-prototype`](./.claude/skills/publish-prototype/SKILL.md)
+— be Claude Code "publicera detta som ett experiment", klistra in HTML, beskriv en idé, eller
+peka på en lokal fil, och den går hela vägen till en live-URL. Se även [`CLAUDE.md`](./CLAUDE.md)
+för bakgrunden till konventionerna.
