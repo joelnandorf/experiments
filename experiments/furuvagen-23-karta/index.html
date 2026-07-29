@@ -8,9 +8,9 @@
 <meta name="description" content="Karta över vårt hus på Furuvägen 23 i Holmsund med solens bana under dagen och årstiderna — för att bedöma placering av solceller.">
 <meta name="experiment:tags" content="karta, holmsund, hus, sol, solceller">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+<link rel="stylesheet" href="vendor/leaflet.css">
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/suncalc.js"></script>
 
 <style>
   :root {
@@ -116,6 +116,24 @@
     margin-bottom: 8px;
   }
 
+  .sun-row-scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+
+  .sun-row-scroll input[type="date"],
+  .sun-row-scroll button {
+    flex: none;
+  }
+
+  @media (min-width: 640px) {
+    .sun-panel { max-width: 640px; }
+    .sun-row-scroll { flex-wrap: wrap; overflow-x: visible; }
+  }
+
   .sun-row label {
     font-size: 0.78rem;
     opacity: 0.8;
@@ -179,16 +197,26 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .legend {
+  .details-toggle {
     margin-top: 8px;
+  }
+
+  .details-toggle summary {
+    cursor: pointer;
+    font-size: 0.75rem;
+    opacity: 0.75;
+    user-select: none;
+  }
+
+  .legend {
+    margin-top: 6px;
     font-size: 0.72rem;
     opacity: 0.8;
     line-height: 1.5;
   }
 
   .legend span {
-    white-space: nowrap;
-    margin-right: 12px;
+    display: block;
   }
 
   .note {
@@ -229,8 +257,26 @@
   }
 
   @media (max-width: 480px) {
-    .sun-panel { font-size: 0.78rem; padding: 10px 12px; }
-    .info-card { max-width: calc(100vw - 24px); }
+    .sun-panel { font-size: 0.78rem; padding: 8px 10px; }
+    .sun-panel h2 { font-size: 0.85rem; margin-bottom: 6px; }
+    .info-card { max-width: calc(100vw - 24px); padding: 10px 14px; }
+    .info-card h1 { font-size: 1rem; }
+    .info-card p { font-size: 0.78rem; }
+    .sun-readout { font-size: 0.74rem; }
+  }
+
+  /* Korta viewports (landsläge på mobil, äldre små telefoner) —
+     ge kartan garanterat utrymme genom att låta panelerna scrolla internt. */
+  @media (max-height: 600px) {
+    .sun-panel {
+      max-height: 42vh;
+      overflow-y: auto;
+    }
+    .info-card {
+      max-height: 32vh;
+      overflow-y: auto;
+    }
+    .info-card p { margin-bottom: 4px; }
   }
 </style>
 </head>
@@ -248,7 +294,7 @@
 <div class="panel sun-panel">
   <h2>☀️ Solbana &amp; solceller</h2>
 
-  <div class="sun-row">
+  <div class="sun-row sun-row-scroll">
     <label for="date-input">Datum</label>
     <input type="date" id="date-input">
     <button class="preset-btn" id="today-btn" type="button">Idag</button>
@@ -272,17 +318,19 @@
     <div>Soluppgång–solnedgång: <strong id="readout-daylight">–</strong></div>
   </div>
 
-  <div class="legend">
-    <span>☀️ nuvarande solriktning</span>
-    <span>┄ solens bana under dagen</span>
-    <span>🟧 bästa takriktning för solceller (SO–S–SV)</span>
-    <span>⤍ skuggriktning</span>
-  </div>
-
-  <p class="note">
-    Skuggan är en grov uppskattning baserad på en antagen hushöjd (6 m) och tar inte hänsyn till
-    träd, grannhus eller terräng — använd som fingervisning inför en riktig solcellsutredning.
-  </p>
+  <details class="details-toggle">
+    <summary>ℹ️ Teckenförklaring &amp; om beräkningen</summary>
+    <div class="legend">
+      <span>☀️ nuvarande solriktning</span>
+      <span>┄ solens bana under dagen</span>
+      <span>🟧 bästa takriktning för solceller (SO–S–SV)</span>
+      <span>⤍ skuggriktning</span>
+    </div>
+    <p class="note">
+      Skuggan är en grov uppskattning baserad på en antagen hushöjd (6 m) och tar inte hänsyn till
+      träd, grannhus eller terräng — använd som fingervisning inför en riktig solcellsutredning.
+    </p>
+  </details>
 </div>
 
 <script>
@@ -303,7 +351,8 @@
     popupAnchor: [0, -24],
   });
 
-  const map = L.map("map", { zoomControl: true });
+  const map = L.map("map", { zoomControl: false });
+  L.control.zoom({ position: "topright" }).addTo(map);
 
   const streets = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
