@@ -25,6 +25,32 @@ att inget steg glöms bort eller görs i fel ordning.
 
 ## Steg
 
+0. **Säkerställ att du står i `web-experiments`-repot.** Skillen kan triggas
+   från en helt annan Claude-chatt/session än den här — en vars
+   arbetskatalog är ett annat repo, eller inget repo alls.
+   - Kontrollera om aktuell arbetskatalog redan är en checkout av
+     `joelnandorf/web-experiments`, t.ex. genom att `scripts/publish-experiment.mjs`
+     och `templates/basic/index.html` finns relativt cwd, eller att
+     `git remote get-url origin` pekar på `joelnandorf/web-experiments`.
+   - **Om ja:** fortsätt direkt till steg 1, ingen förändring mot idag.
+   - **Om nej:**
+     - Rör **aldrig** den befintliga arbetskatalogen/repot i sessionen — jobba
+       uteslutande i en ny, fristående katalog för resten av flödet.
+     - Om `add_repo`-verktyget finns tillgängligt (Claude Code Remote-miljö):
+       anropa det med `owner: "joelnandorf"`, `repo: "web-experiments"`,
+       `access: "push"` (push krävs eftersom flödet committar och pushar).
+       Klona sedan med kommandot verktyget returnerar till en ny katalog
+       (t.ex. i sessionens scratchpad-katalog om en sådan finns, annars en
+       tillfällig katalog utanför befintligt repo), och anropa
+       `register_repo_root` med den absoluta sökvägen till klonen.
+     - Om `add_repo` inte finns (vanlig lokal Claude Code utan CCR-verktyg):
+       klona direkt med
+       `git clone https://github.com/joelnandorf/web-experiments.git <ny-katalog>`.
+     - Använd den klonade katalogen som bas för **alla** efterföljande steg i
+       den här skill-körningen (skriva `experiments/<slug>/index.html`, köra
+       `node scripts/publish-experiment.mjs …`) — räkna sökvägar relativt den
+       katalogen eller `cd` dit.
+
 1. **Identifiera HTML-källan.**
    - Pastad HTML i chatten → använd den direkt, städa upp den om den är
      halvfärdig men ändra inte designintentionen.
@@ -56,7 +82,9 @@ att inget steg glöms bort eller görs i fel ordning.
 
 5. **Bygg, committa och pusha i ett enda steg** med hjälpskriptet som hör
    till detta repo — kör aldrig build/git manuellt steg för steg för det gör
-   det lätt att glömma valideringen eller pusha till fel branch:
+   det lätt att glömma valideringen eller pusha till fel branch. Kör det från
+   den repo-katalog som fastställdes i steg 0 (befintlig cwd, eller den
+   nyklonade katalogen):
    ```
    node scripts/publish-experiment.mjs <slug> ["valfritt commit-meddelande"]
    ```
@@ -77,6 +105,10 @@ att inget steg glöms bort eller görs i fel ordning.
 
 ## Att tänka på
 
+- Vilken lokal branch (eller vilket repo) som råkar vara utcheckat i chatten
+  spelar ingen roll — `publish-experiment.mjs` pushar alltid till
+  `origin/main` i `web-experiments`, oavsett om du körde skillen i en
+  nyklonad katalog (steg 0) eller i en befintlig checkout.
 - Detta är ett lågriskigt sandbox-repo — direkt push till `main` är
   avsiktligt och okej, ingen PR-process behövs för vanliga experiment.
 - Håll varje prototyp självständig och beroendefri (öppnas direkt som en
