@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds dist/ from experiments/*/index.html — no external dependencies.
 import { execSync } from "node:child_process";
-import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = new URL("..", import.meta.url).pathname;
@@ -166,6 +166,11 @@ function build() {
 
   writeFileSync(join(DIST_DIR, "index.html"), renderIndex(experiments));
   writeFileSync(join(DIST_DIR, ".nojekyll"), "");
+
+  const cnamePath = join(ROOT, "CNAME");
+  if (existsSync(cnamePath)) {
+    cpSync(cnamePath, join(DIST_DIR, "CNAME"));
+  }
 
   console.log(`Byggde ${experiments.length} experiment till dist/`);
   for (const exp of experiments) console.log(`  - ${exp.slug}: "${exp.title}"`);
