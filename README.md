@@ -2,7 +2,7 @@
 
 Publika HTML-prototyper — en mapp per experiment, publicerat automatiskt via GitHub Pages.
 
-**Live:** https://joelnandorf.github.io/web-experiments/
+**Live:** https://experiments.nandorf.dev/
 
 ## Lägg till ett nytt experiment
 
@@ -17,7 +17,7 @@ Publika HTML-prototyper — en mapp per experiment, publicerat automatiskt via G
    mappen, och pushar till `origin/main` — oavsett vilken lokal branch du står på.
 
 GitHub Actions bygger och publicerar automatiskt inom en minut eller två. Experimentet blir
-live på `https://joelnandorf.github.io/web-experiments/experiments/<mitt-experiment>/` och
+live på `https://experiments.nandorf.dev/experiments/<mitt-experiment>/` och
 dyker upp som ett kort på startsidan.
 
 ## Hur det fungerar

@@ -97,8 +97,8 @@ att inget steg glöms bort eller görs i fel ordning.
    `git fetch origin main && git rebase origin/main` och försök igen.
 
 6. **Rapportera till användaren:**
-   - Den publika URL:en: `https://joelnandorf.github.io/web-experiments/experiments/<slug>/`
-   - Att översiktssidan (`https://joelnandorf.github.io/web-experiments/`)
+   - Den publika URL:en: `https://experiments.nandorf.dev/experiments/<slug>/`
+   - Att översiktssidan (`https://experiments.nandorf.dev/`)
      uppdateras automatiskt med det nya kortet.
    - Att det tar ungefär en minut eller två innan det syns live (tiden det
      tar för GitHub Actions att bygga och deploya).
