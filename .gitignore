@@ -1,2 +1,7 @@
-dist/
 node_modules/
+.next/
+out/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

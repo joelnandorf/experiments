@@ -1,45 +1,72 @@
 # Instruktioner för Claude Code i detta repo
 
-Detta repo är en samling publika HTML-prototyper. Varje experiment är en egen mapp under
-`experiments/<slug>/` med en `index.html` (plus ev. CSS/JS/bilder i samma mapp). Att pusha till
-`main` bygger och publicerar automatiskt via GitHub Actions + GitHub Pages — inget extra
-devops-steg krävs.
+Detta repo är en samling publika prototyper, byggt med **Next.js (App Router) + shadcn/ui**,
+statiskt exporterat och publicerat via GitHub Pages. Varje nytt experiment är en route under
+`app/(experiments)/<slug>/` med en `page.tsx` + `meta.ts`, och får automatiskt det delade
+"wireframe"-temat (gråskala, streckade kanter, platshållarblock) och `components/ui/*`
+(shadcn-komponenter) via `app/layout.tsx`/`app/globals.css`. Att pusha till `main` bygger
+(`next build` med `output: "export"`) och publicerar automatiskt via GitHub Actions + GitHub
+Pages — inget extra devops-steg krävs.
+
+De fyra experiment som fanns innan migreringen (`click-counter`, `hello-world`, `gokur-klocka`,
+`furuvagen-23-karta`) ligger orörda som rå HTML i `public/<slug>/` och serveras som statiska
+filer — de skrivs **inte** om till React. `public/` är en stängd, frusen lista; se
+"Att inte göra" nedan.
 
 ## Att skapa och publicera ett nytt experiment ("skapa ett experiment som gör X")
 
 Detta flöde finns paketerat som skillen [`publish-prototype`](./.claude/skills/publish-prototype/SKILL.md)
-— läs den för fullständiga instruktioner (bl.a. hur man hanterar slug-kollisioner och HTML
-klistrad direkt i chatten). I korthet:
+— läs den för fullständiga instruktioner (bl.a. hur man hanterar slug-kollisioner och pastad
+HTML som ska konverteras till en React-sida). I korthet:
 
-1. Välj ett kebab-case-slug som beskriver experimentet, t.ex. `experiments/farg-slumpare/`.
-   Utgå gärna från `templates/basic/index.html` som startpunkt.
-2. Bygg experimentet i `experiments/<slug>/index.html` (+ ev. fler filer i samma mapp).
-   Sätt alltid:
-   - `<title>` — visas som experimentets namn på översiktssidan.
-   - `<meta name="description" content="...">` — kort beskrivning på kortet.
-   - Valfritt: `<meta name="experiment:tags" content="tag1, tag2">` för chips på kortet.
-3. Bygg, committa och pusha i ett steg med hjälpskriptet — kör inte build/git manuellt, det
+1. Välj ett kebab-case-slug som beskriver experimentet, t.ex. `farg-slumpare`.
+   Kopiera `templates/basic/page.tsx` + `templates/basic/meta.ts` till
+   `app/(experiments)/<slug>/`.
+2. Bygg UI:t i `page.tsx` med `components/ui/*` (redan wireframe-styled) eller egen
+   Tailwind/CSS om experimentet vill ha en helt egen look. Lägg till `"use client"` som
+   första rad om sidan använder hooks/event-handlers/canvas/andra webbläsar-API:er.
+3. Sätt alltid i `meta.ts`:
+   - `title` — visas som experimentets namn på översiktssidan.
+   - `description` — kort beskrivning på kortet.
+   - `tags` (valfritt) — lista med taggar, visas som chips.
+   - `date` — obligatoriskt, `"YYYY-MM-DD"`.
+4. Bygg, committa och pusha i ett steg med hjälpskriptet — kör inte build/git manuellt, det
    är lätt att glömma valideringssteget eller pusha till fel branch:
    ```
    node scripts/publish-experiment.mjs <slug> ["valfritt commit-meddelande"]
    ```
-   Skriptet pushar alltid till `origin/main` (oavsett vilken lokal branch som är utcheckad),
-   eftersom det är push till `main` som triggar publiceringen.
-4. Rapportera till användaren:
+   Skriptet kör `npm run build` som validering och pushar alltid till `origin/main`
+   (oavsett vilken lokal branch som är utcheckad), eftersom det är push till `main` som
+   triggar publiceringen.
+5. Rapportera till användaren:
    - Den publika URL:en: `https://experiments.nandorf.dev/<slug>/`
    - Att översiktssidan uppdateras på `https://experiments.nandorf.dev/` inom
      en minut eller två (GitHub Actions-byggtid).
 
 ## Att ändra ett befintligt experiment
 
-Redigera filerna i `experiments/<slug>/`, kör därefter samma
-`node scripts/publish-experiment.mjs <slug>` för att validera, committa och publicera.
+Redigera filerna i `app/(experiments)/<slug>/` (eller `public/<slug>/` för de fyra
+legacy-experimenten), kör därefter samma `node scripts/publish-experiment.mjs <slug>` för
+att validera, committa och publicera.
+
+## Det delade wireframe-temat
+
+Design tokens (gråskala, `--radius`, m.m.) bor i `app/globals.css`, konsumerade av
+`components/ui/*` via CSS-variabler. Ett enskilt experiment kan avvika utan att röra delade
+filer:
+- Skriv om CSS-variablerna lokalt i en wrapper-klass i sin egen `page.tsx`, eller
+- Hoppa helt över `components/ui/*` och skriv egen Tailwind/CSS i den filen.
 
 ## Att inte göra
 
-- Skapa inte enskilda lösa `.html`-filer utanför en mapp under `experiments/` — konventionen är
-  alltid en mapp per experiment, även för mycket små prototyper.
-- Ändra inte `scripts/build-site.mjs` eller `.github/workflows/deploy.yml` för att lösa ett
-  enskilt experiments behov — de ska förbli generiska för alla experiment.
-- Lägg inte till npm-dependencies i `package.json` utan att användaren efterfrågar det —
-  byggskriptet är avsiktligt beroendefritt för att hålla pipelinen enkel och snabb.
+- Lägg inte nya experiment direkt i `public/` — den mappen är en stängd lista över de fyra
+  grandfathered HTML-experimenten från innan Next.js-migreringen. Allt nytt går via
+  `app/(experiments)/<slug>/`, även pastad, fristående HTML (konvertera den till en
+  `page.tsx` enligt `publish-prototype`-skillen).
+- Ändra inte delade tokens i `app/globals.css`, `app/layout.tsx` eller `components/ui/*` för
+  att lösa ett enskilt experiments behov — de ska förbli generiska för alla experiment.
+  Override:a på routenivå istället (se ovan).
+- Ändra inte `next.config.ts` eller `.github/workflows/deploy.yml` för att lösa ett enskilt
+  experiments behov — de ska förbli generiska.
+- Lägg inte till npm-dependencies utöver den etablerade Next.js/Tailwind/shadcn-stacken utan
+  att användaren efterfrågar det.

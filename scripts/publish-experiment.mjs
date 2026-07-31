@@ -10,14 +10,23 @@ const slug = process.argv[2];
 const customMessage = process.argv.slice(3).join(" ");
 
 if (!slug) {
-  console.error("Användning: node scripts/publish-experiment.mjs <slug> [\"commit-meddelande\"]");
+  console.error('Användning: node scripts/publish-experiment.mjs <slug> ["commit-meddelande"]');
   process.exit(1);
 }
 
-const expDir = join("experiments", slug);
-const indexPath = join(ROOT, expDir, "index.html");
-if (!existsSync(indexPath)) {
-  console.error(`Hittar ingen experiments/${slug}/index.html — skapa filen först.`);
+const appDir = join("app", "(experiments)", slug);
+const legacyDir = join("public", slug);
+
+let targetDir;
+if (existsSync(join(ROOT, appDir, "page.tsx"))) {
+  targetDir = appDir;
+} else if (existsSync(join(ROOT, legacyDir))) {
+  targetDir = legacyDir;
+} else {
+  console.error(
+    `Hittar ingen app/(experiments)/${slug}/page.tsx eller public/${slug}/ — skapa experimentet först ` +
+      `(kopiera templates/basic/page.tsx + meta.ts till app/(experiments)/${slug}/).`,
+  );
   process.exit(1);
 }
 
@@ -28,13 +37,13 @@ function runCapture(cmd) {
   return execSync(cmd, { cwd: ROOT, encoding: "utf8" });
 }
 
-console.log(`\n→ Bygger och validerar experiments/${slug} ...`);
-run("node scripts/build-site.mjs");
+console.log(`\n→ Bygger och validerar hela sajten (inkl. ${targetDir}) ...`);
+run("npm run build");
 
-console.log(`\n→ Stagear ${expDir} ...`);
-run(`git add ${JSON.stringify(expDir)}`);
+console.log(`\n→ Stagear ${targetDir} ...`);
+run(`git add ${JSON.stringify(targetDir)}`);
 
-const staged = runCapture(`git diff --cached --name-only -- ${JSON.stringify(expDir)}`).trim();
+const staged = runCapture(`git diff --cached --name-only -- ${JSON.stringify(targetDir)}`).trim();
 if (!staged) {
   console.log("Inga ändringar att committa (experimentet matchar redan senaste commit).");
 } else {
