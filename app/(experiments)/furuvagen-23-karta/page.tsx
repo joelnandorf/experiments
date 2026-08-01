@@ -3,6 +3,10 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 const LEAFLET_CSS_HREF = "/vendor/leaflet/leaflet.css";
 const LEAFLET_JS_SRC = "/vendor/leaflet/leaflet.js";
 const SUNCALC_JS_SRC = "/vendor/leaflet/suncalc.js";
@@ -365,7 +369,7 @@ export default function Page() {
         <div id="map" ref={mapContainerRef} />
 
         <p className="back-link">
-          <Link href="/">← Alla experiment</Link>
+          <Button variant="link" className="h-auto" render={<Link href="/">← Alla experiment</Link>} />
         </p>
 
         <div className="panel info-card">
@@ -374,43 +378,51 @@ export default function Page() {
           <p className="status" ref={statusRef}>
             Söker adressen …
           </p>
-          <button ref={resetBtnRef} type="button" hidden>
+          <Button ref={resetBtnRef} type="button" hidden className="h-auto">
             Återställ nålen
-          </button>
+          </Button>
         </div>
 
         <div className="panel sun-panel">
           <h2>☀️ Solbana &amp; solceller</h2>
 
           <div className="sun-row sun-row-scroll">
-            <label htmlFor="date-input">Datum</label>
-            <input ref={dateInputRef} type="date" id="date-input" />
-            <button className="preset-btn" id="today-btn" type="button">
+            <Label htmlFor="date-input">Datum</Label>
+            <Input ref={dateInputRef} type="date" id="date-input" className="h-auto w-auto" />
+            <Button className="preset-btn h-auto" id="today-btn" type="button">
               Idag
-            </button>
-            <button className="preset-btn" data-preset="winter" type="button">
+            </Button>
+            <Button className="preset-btn h-auto" data-preset="winter" type="button">
               Vintersolstånd
-            </button>
-            <button className="preset-btn" data-preset="spring" type="button">
+            </Button>
+            <Button className="preset-btn h-auto" data-preset="spring" type="button">
               Vårdagjämning
-            </button>
-            <button className="preset-btn" data-preset="summer" type="button">
+            </Button>
+            <Button className="preset-btn h-auto" data-preset="summer" type="button">
               Sommarsolstånd
-            </button>
-            <button className="preset-btn" data-preset="autumn" type="button">
+            </Button>
+            <Button className="preset-btn h-auto" data-preset="autumn" type="button">
               Höstdagjämning
-            </button>
+            </Button>
           </div>
 
           <div className="sun-row">
-            <label htmlFor="time-input">Tid</label>
-            <input ref={timeInputRef} type="range" id="time-input" min={0} max={1439} step={5} />
+            <Label htmlFor="time-input">Tid</Label>
+            <Input
+              ref={timeInputRef}
+              type="range"
+              id="time-input"
+              min={0}
+              max={1439}
+              step={5}
+              className="h-auto w-auto"
+            />
             <span className="time-label" ref={timeLabelRef}>
               --:--
             </span>
-            <button className="animate-btn" ref={animateBtnRef} type="button">
+            <Button className="animate-btn h-auto" ref={animateBtnRef} type="button">
               ▶ Animera dagen
-            </button>
+            </Button>
           </div>
 
           <div className="sun-readout">
