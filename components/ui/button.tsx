@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
@@ -37,19 +37,22 @@ function Button({
   className,
   variant,
   size,
-  asChild = false,
+  render,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "button";
-
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+}: useRender.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
+  return useRender({
+    defaultTagName: "button",
+    render,
+    props: mergeProps<"button">(
+      {
+        className: cn(buttonVariants({ variant, size, className })),
+      },
+      props,
+    ),
+    state: {
+      slot: "button",
+    },
+  });
 }
 
 export { Button, buttonVariants };
