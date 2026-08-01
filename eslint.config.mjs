@@ -12,7 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Vendorade/rå HTML-experiment — inte lintbar källkod, se CLAUDE.md.
+    // Vendorade tredjeparts-assets (t.ex. public/vendor/leaflet) — inte lintbar källkod.
     "public/**",
   ]),
 ]);

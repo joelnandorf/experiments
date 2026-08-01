@@ -14,11 +14,6 @@ npm run dev
 
 Öppna `http://localhost:3000`. `npm run dev` kör bara lokalt — det påverkar inte produktion.
 
-Obs: legacy-experimentens kort (`public/<slug>/`) länkar till `/<slug>/`, men Next.js'
-dev-server saknar katalog-index-fallback för statiska filer i `public/` — under `npm run dev`
-måste du gå till `/<slug>/index.html` för att se dem. I den byggda/publicerade sajten
-(`npm run build` + `out/`, och på GitHub Pages) fungerar `/<slug>/` som vanligt.
-
 ## Lägg till ett nytt experiment
 
 1. Kopiera `templates/basic/page.tsx` + `templates/basic/meta.ts` till en ny mapp:
@@ -44,24 +39,17 @@ startsidan.
 
 ## Hur det fungerar
 
-- `app/page.tsx` upptäcker experiment vid build: skannar `app/(experiments)/*/meta.ts` och
-  slår ihop med `lib/legacy-experiments.ts` (de fyra HTML-experimenten som fanns innan
-  Next.js-migreringen, se nedan), sorterar på datum, renderar kortgriden.
+- `app/page.tsx` upptäcker experiment vid build: skannar `app/(experiments)/*/meta.ts`,
+  sorterar på datum, renderar kortgriden.
 - `next.config.ts` sätter `output: "export"` — sajten byggs till en helt statisk `out/`-mapp,
   ingen Node-server behövs vid deploy.
 - `.github/workflows/deploy.yml` körs vid varje push till `main`, kör `npm run build` och
   publicerar `out/` till GitHub Pages.
 - `scripts/publish-experiment.mjs` (kört via `npm run ship -- <slug>`) paketerar build +
   commit + push i ett steg, så att inget av dessa moment glöms bort eller görs i fel ordning.
-
-### Legacy-experiment
-
-`click-counter`, `hello-world`, `gokur-klocka` och `furuvagen-23-karta` fanns som
-fristående HTML-mappar innan migreringen till Next.js. De ligger orörda i `public/<slug>/`
-och serveras rakt av (Next kopierar `public/` verbatim till exporten) — främst för att
-`furuvagen-23-karta`s vendorade Leaflet-karta inte skulle riskera att gå sönder i en
-ombyggnad. `public/` är en stängd lista; nya experiment läggs alltid under
-`app/(experiments)/`.
+- `public/` innehåller bara delade statiska assets som inte är experiment-routes, t.ex.
+  `public/vendor/leaflet/` (vendorat Leaflet + SunCalc, använt av `furuvagen-23-karta`) och
+  `public/CNAME`.
 
 ## Engångssetup (redan gjort om sajten är live)
 

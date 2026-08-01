@@ -15,20 +15,16 @@ if (!slug) {
 }
 
 const appDir = join("app", "(experiments)", slug);
-const legacyDir = join("public", slug);
 
-let targetDir;
-if (existsSync(join(ROOT, appDir, "page.tsx"))) {
-  targetDir = appDir;
-} else if (existsSync(join(ROOT, legacyDir))) {
-  targetDir = legacyDir;
-} else {
+if (!existsSync(join(ROOT, appDir, "page.tsx"))) {
   console.error(
-    `Hittar ingen app/(experiments)/${slug}/page.tsx eller public/${slug}/ — skapa experimentet först ` +
+    `Hittar ingen app/(experiments)/${slug}/page.tsx — skapa experimentet först ` +
       `(kopiera templates/basic/page.tsx + meta.ts till app/(experiments)/${slug}/).`,
   );
   process.exit(1);
 }
+
+const targetDir = appDir;
 
 function run(cmd) {
   execSync(cmd, { cwd: ROOT, stdio: "inherit" });

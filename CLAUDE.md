@@ -8,10 +8,11 @@ statiskt exporterat och publicerat via GitHub Pages. Varje nytt experiment är e
 (`next build` med `output: "export"`) och publicerar automatiskt via GitHub Actions + GitHub
 Pages — inget extra devops-steg krävs.
 
-De fyra experiment som fanns innan migreringen (`click-counter`, `hello-world`, `gokur-klocka`,
-`furuvagen-23-karta`) ligger orörda som rå HTML i `public/<slug>/` och serveras som statiska
-filer — de skrivs **inte** om till React. `public/` är en stängd, frusen lista; se
-"Att inte göra" nedan.
+Alla experiment, inklusive de fyra äldsta (`click-counter`, `hello-world`, `gokur-klocka`,
+`furuvagen-23-karta`, migrerade från rå HTML till React 2026-08-01), ligger som routes under
+`app/(experiments)/<slug>/`. `public/` innehåller bara delade statiska assets som inte är
+routes, t.ex. `public/vendor/leaflet/` (vendorat Leaflet + SunCalc, använt av
+`furuvagen-23-karta`) och `public/CNAME`; se "Att inte göra" nedan.
 
 ## Att skapa och publicera ett nytt experiment ("skapa ett experiment som gör X")
 
@@ -45,9 +46,8 @@ HTML som ska konverteras till en React-sida). I korthet:
 
 ## Att ändra ett befintligt experiment
 
-Redigera filerna i `app/(experiments)/<slug>/` (eller `public/<slug>/` för de fyra
-legacy-experimenten), kör därefter samma `node scripts/publish-experiment.mjs <slug>` för
-att validera, committa och publicera.
+Redigera filerna i `app/(experiments)/<slug>/`, kör därefter samma
+`node scripts/publish-experiment.mjs <slug>` för att validera, committa och publicera.
 
 ## Det delade wireframe-temat
 
@@ -59,8 +59,8 @@ filer:
 
 ## Att inte göra
 
-- Lägg inte nya experiment direkt i `public/` — den mappen är en stängd lista över de fyra
-  grandfathered HTML-experimenten från innan Next.js-migreringen. Allt nytt går via
+- Lägg inte nya experiment direkt i `public/` — den mappen används bara för delade statiska
+  assets (t.ex. vendorade tredjepartsbibliotek), inte för experiment-routes. Allt nytt går via
   `app/(experiments)/<slug>/`, även pastad, fristående HTML (konvertera den till en
   `page.tsx` enligt `publish-prototype`-skillen).
 - Ändra inte delade tokens i `app/globals.css`, `app/layout.tsx` eller `components/ui/*` för
