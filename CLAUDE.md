@@ -57,6 +57,34 @@ filer:
 - Skriv om CSS-variablerna lokalt i en wrapper-klass i sin egen `page.tsx`, eller
 - Hoppa helt över `components/ui/*` och skriv egen Tailwind/CSS i den filen.
 
+## Tillgängliga komponenter i components/ui/*
+
+Byggda på **Base UI** (`@base-ui/react`, inte Radix) + `class-variance-authority`, i shadcn/ui:s
+"new-york"-stil (se `components.json`). Alla följer redan wireframe-temat via CSS-variablerna i
+`app/globals.css` — importera bara och använd. Ett levande showcase med alla komponenter finns i
+`app/(experiments)/komponent-lekplats/page.tsx`.
+
+- **Layout/innehåll**: `Card` (+ `CardHeader`/`CardTitle`/`CardDescription`/`CardContent`/
+  `CardFooter`), `Separator`, `Skeleton`, `Badge`, `Avatar` (+ `AvatarImage`/`AvatarFallback`).
+- **Formulär**: `Input`, `Label`, `Textarea`, `Checkbox`, `Switch`, `RadioGroup` (+
+  `RadioGroupItem`), `Select` (+ `SelectTrigger`/`SelectValue`/`SelectContent`/`SelectItem`/
+  `SelectLabel`/`SelectGroup`/`SelectSeparator`).
+- **Navigation/disclosure**: `Tabs` (+ `TabsList`/`TabsTrigger`/`TabsContent`).
+- **Overlay**: `Dialog` (+ `DialogTrigger`/`DialogContent`/`DialogHeader`/`DialogFooter`/
+  `DialogTitle`/`DialogDescription`/`DialogClose`), `Tooltip` (+ `TooltipTrigger`/
+  `TooltipContent`/`TooltipProvider`).
+- **Feedback**: `Alert` (+ `AlertTitle`/`AlertDescription`), `Progress`.
+- **Actions**: `Button`.
+
+Base UI använder en `render`-prop för komposition istället för Radix `asChild`, t.ex.
+`<DialogTrigger render={<Button variant="outline">Öppna</Button>} />` — inte
+`<DialogTrigger asChild><Button>...</Button></DialogTrigger>`.
+
+Behövs en komponent som inte finns i listan (t.ex. `Accordion`, `Popover`, `Slider`,
+`Table`)? Base UI har primitiv för de flesta (`node_modules/@base-ui/react/*`) — bygg den nya
+`components/ui/<namn>.tsx` enligt samma mönster som ovan (cva-klasser + Base UI-primitiv,
+`data-[checked]`/`data-[open]`-attribut för state, inte Radix `data-state=`).
+
 ## Att inte göra
 
 - Lägg inte nya experiment direkt i `public/` — den mappen används bara för delade statiska

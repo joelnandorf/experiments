@@ -50,6 +50,9 @@ startsidan.
 - `public/` innehåller bara delade statiska assets som inte är experiment-routes, t.ex.
   `public/vendor/leaflet/` (vendorat Leaflet + SunCalc, använt av `furuvagen-23-karta`) och
   `public/CNAME`.
+- `components/ui/*` är shadcn/ui-komponenter byggda på Base UI (`@base-ui/react`) — se
+  [`CLAUDE.md`](./CLAUDE.md#tillgängliga-komponenter-i-componentsui) för hela listan, eller kolla
+  `app/(experiments)/komponent-lekplats/page.tsx` för ett levande showcase.
 
 ## Engångssetup (redan gjort om sajten är live)
 
