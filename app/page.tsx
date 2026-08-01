@@ -4,21 +4,13 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { legacyExperiments, type LegacyExperiment } from "@/lib/legacy-experiments";
 import type { ExperimentMeta } from "@/lib/types";
 
-interface AppExperiment extends ExperimentMeta {
+interface Experiment extends ExperimentMeta {
   slug: string;
-  kind: "app";
 }
 
-interface LegacyExperimentEntry extends LegacyExperiment {
-  kind: "legacy";
-}
-
-type Experiment = AppExperiment | LegacyExperimentEntry;
-
-async function discoverAppExperiments(): Promise<AppExperiment[]> {
+async function discoverExperiments(): Promise<Experiment[]> {
   const experimentsDir = path.join(process.cwd(), "app", "(experiments)");
   let slugs: string[] = [];
   try {
@@ -34,7 +26,7 @@ async function discoverAppExperiments(): Promise<AppExperiment[]> {
       const { meta } = (await import(`./(experiments)/${slug}/meta`)) as {
         meta: ExperimentMeta;
       };
-      return { slug, kind: "app" as const, ...meta };
+      return { slug, ...meta };
     }),
   );
 
@@ -42,15 +34,7 @@ async function discoverAppExperiments(): Promise<AppExperiment[]> {
 }
 
 export default async function Home() {
-  const appExperiments = await discoverAppExperiments();
-  const legacy: LegacyExperimentEntry[] = legacyExperiments.map((experiment) => ({
-    ...experiment,
-    kind: "legacy" as const,
-  }));
-
-  const experiments: Experiment[] = [...appExperiments, ...legacy].sort((a, b) =>
-    b.date.localeCompare(a.date),
-  );
+  const experiments = (await discoverExperiments()).sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -76,38 +60,24 @@ export default async function Home() {
 
 function ExperimentCard({ experiment }: { experiment: Experiment }) {
   const href = `/${experiment.slug}/`;
-  const content = (
-    <Card className="wireframe-border h-full transition-colors hover:bg-accent/40">
-      <CardHeader>
-        <CardTitle>{experiment.title}</CardTitle>
-        {experiment.description ? (
-          <CardDescription>{experiment.description}</CardDescription>
-        ) : null}
-      </CardHeader>
-      <CardContent className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground text-xs">{experiment.date}</span>
-        {experiment.tags?.map((tag) => (
-          <Badge key={tag} variant="outline">
-            {tag}
-          </Badge>
-        ))}
-      </CardContent>
-    </Card>
-  );
-
-  // Legacy-experiment är statiska HTML-filer som Next inte känner till som routes —
-  // en vanlig länk undviker att next/link försöker prefetcha/intercepta navigeringen.
-  if (experiment.kind === "legacy") {
-    return (
-      <a href={href} className="block">
-        {content}
-      </a>
-    );
-  }
-
   return (
     <Link href={href} className="block">
-      {content}
+      <Card className="wireframe-border h-full transition-colors hover:bg-accent/40">
+        <CardHeader>
+          <CardTitle>{experiment.title}</CardTitle>
+          {experiment.description ? (
+            <CardDescription>{experiment.description}</CardDescription>
+          ) : null}
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground text-xs">{experiment.date}</span>
+          {experiment.tags?.map((tag) => (
+            <Badge key={tag} variant="outline">
+              {tag}
+            </Badge>
+          ))}
+        </CardContent>
+      </Card>
     </Link>
   );
 }

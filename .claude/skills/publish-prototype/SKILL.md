@@ -77,8 +77,7 @@ steg glöms bort eller görs i fel ordning.
    uppenbart; annars, fråga användaren med en kort fråga i stället för att
    gissa.
 
-3. **Kolla kollision.** Om `app/(experiments)/<slug>/` (eller `public/<slug>/`
-   för de fyra grandfathered legacy-experimenten) redan finns, fråga
+3. **Kolla kollision.** Om `app/(experiments)/<slug>/` redan finns, fråga
    användaren om den ska skrivas över eller om ett nytt slug ska väljas i
    stället. Skriv aldrig över tyst — det kan vara någon annans pågående
    prototyp.
@@ -126,11 +125,12 @@ steg glöms bort eller görs i fel ordning.
   nyklonad katalog (steg 0) eller i en befintlig checkout.
 - Detta är ett lågriskigt sandbox-repo — direkt push till `main` är
   avsiktligt och okej, ingen PR-process behövs för vanliga experiment.
-- `public/` innehåller enbart de fyra grandfathered experimenten från innan
-  Next.js-migreringen (rå HTML, servas som statiska filer). Lägg **aldrig**
-  ett nytt experiment där — även ett pastat, helt fristående HTML-dokument
-  ska konverteras till en `page.tsx` enligt steg 1, så att det får det delade
-  temat/komponenterna och syns i build-time-upptäckten på översiktssidan.
+- `public/` innehåller bara delade statiska assets som inte är
+  experiment-routes (t.ex. vendorade tredjepartsbibliotek, `CNAME`). Lägg
+  **aldrig** ett nytt experiment där — även ett pastat, helt fristående
+  HTML-dokument ska konverteras till en `page.tsx` enligt steg 1, så att det
+  får det delade temat/komponenterna och syns i build-time-upptäckten på
+  översiktssidan.
 - Om `node scripts/publish-experiment.mjs` felar på byggsteget, fixa felet
   (typfel, trasig JSX, saknad `meta.ts`-fält) och kör om — hoppa aldrig över
   valideringssteget för att "bara pusha ändå".
