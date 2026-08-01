@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+
 const MARKERS = Array.from({ length: 60 }, (_, i) => ({
   major: i % 5 === 0,
   deg: i * 6,
@@ -464,15 +466,19 @@ export default function Page() {
           </div>
 
           <div className="controls">
-            <button type="button" disabled={isCuckooing} onClick={handleTrigger}>
+            <Button className="h-auto" disabled={isCuckooing} onClick={handleTrigger}>
               Väck göken 🐦
-            </button>
+            </Button>
             <div className="status">{status}</div>
           </div>
         </div>
 
         <p className="back-link">
-          <Link href="/">← Tillbaka till alla experiment</Link>
+          <Button
+            variant="link"
+            className="h-auto p-0"
+            render={<Link href="/">← Tillbaka till alla experiment</Link>}
+          />
         </p>
       </div>
     </>
